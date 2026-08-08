@@ -5,36 +5,790 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>HVZARE 扫雷</title>
 <style>
-:root{
---primary:#D0BCFF;
---surface:rgba(255,255,255,.14);
---border:rgba(255,255,255,.25);
+:root{--primary:#D0BCFF;--surface:rgba(255,255,255,.14);--border:rgba(255,255,255,.25)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{min-height:100vh;background:#141218;font-family:"Google Sans","Microsoft YaHei",sans-serif;color:white;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#particles{position:fixed;inset:0;z-index:0;pointer-events:none}
+.wallpaper{position:fixed;inset:-80px;z-index:-1;background:linear-gradient(rgba(20,18,24,.35),rgba(20,18,24,.85)),url("./assets/wallpaper.jpg");background-size:cover;background-position:center;animation:bgMove 20s infinite alternate}
+@keyframes bgMove{from{transform:scale(1)}to{transform:scale(1.15)}}
+.container{position:relative;z-index:2;background:var(--surface);backdrop-filter:blur(35px);-webkit-backdrop-filter:blur(35px);border:1px solid var(--border);border-radius:36px;padding:30px;box-shadow:0 30px 80px #0008;text-align:center;max-width:95vw}
+.home{position:fixed;top:20px;left:20px;z-index:3;padding:12px 20px;border-radius:50px;background:rgba(255,255,255,.15);backdrop-filter:blur(20px);color:white;text-decoration:none;border:1px solid var(--border)}
+h1{color:var(--primary);margin-bottom:20px}
+.info{display:flex;justify-content:space-around;margin-bottom:15px}
+button,select{padding:12px 20px;margin:5px;border:0;border-radius:50px;background:#D0BCFF;color:#21005D;font-weight:bold}
+button{cursor:pointer}
+.board-box{overflow:auto;max-width:90vw}
+.board{display:grid;gap:5px;margin-top:20px}
+.cell{width:36px;height:36px;border-radius:10px;background:#49454F;display:flex;justify-content:center;align-items:center;font-weight:bold;cursor:pointer;transition:.2s}
+.cell:hover{transform:scale(1.1)}
+.open{background:#EADDFF;color:#21005D}
+.mine{background:#BA1A1A}
+.flag{background:#6750A4}
+.message{margin-top:20px;color:#EADDFF}
+@media(max-width:600px){
+.cell{width:30px;height:30px}
+.container{padding:20px}
 }
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+<div class="wallpaper"></div>
+
+<a class="home" href="./index.html">← 返回主页</a>
+
+<div class="container">
+<h1>💣 HVZARE 扫雷</h1>
+
+<div class="info">
+<div>💣 <span id="mineCount">10</span></div>
+<div>⏱ <span id="time">0</span></div>
+<div>🏆 <span id="best">-</span></div>
+</div>
+
+<select id="level" onchange="changeLevel()">
+<option value="easy">初级 9×9</option>
+<option value="normal">中级 16×16</option>
+<option value="hard">高级 30×16</option>
+</select>
+
+<br>
+
+<button onclick="restart()">重新开始</button>
+<button onclick="toggleFlag()">🚩 插旗</button>
+
+<div class="board-box">
+<div class="board" id="board"></div>
+</div>
+
+<div class="message" id="msg">⛏ 开始游戏</div>
+</div>
+
+<script>
+const levels={
+easy:{rows:9,cols:9,mine:10},
+normal:{rows:16,cols:16,mine:40},
+hard:{rows:16,cols:30,mine:99}
+};
+
+let rows=9,cols=9,mineCount=10;
+let board=[];
+let cells=[];
+let gameOver=false;
+let flagMode=false;
+let seconds=0;
+let timer;
+
+const boardDiv=document.getElementById("board");
+const msg=document.getElementById("msg");
+const time=document.getElementById("time");
+const mineText=document.getElementById("mineCount");
+const bestText=document.getElementById("best");
+
+
+function changeLevel(){
+
+let l=document.getElementById("level").value;
+
+rows=levels[l].rows;
+cols=levels[l].cols;
+mineCount=levels[l].mine;
+
+restart();
+
 }
-body{
-min-height:100vh;
-background:#141218;
-font-family:"Google Sans","Microsoft YaHei",sans-serif;
-color:white;
-display:flex;
-align-items:center;
-justify-content:center;
-overflow:hidden;
+
+
+function restart(){
+
+clearInterval(timer);
+
+seconds=0;
+time.innerText=0;
+
+gameOver=false;
+flagMode=false;
+
+msg.innerText="⛏ 开始游戏";
+
+mineText.innerText=mineCount;
+
+createBoard();
+
+timer=setInterval(()=>{
+
+seconds++;
+time.innerText=seconds;
+
+},1000);
+
 }
-.wallpaper{
-position:fixed;
-inset:-80px;
-z-index:-2;
-background:
-linear-gradient(
-rgba(20,18,24,.35),
-rgba(20,18,24,.85)
-),
-url("../../assets/wallpaper.jpg");
+
+
+
+function toggleFlag(){
+
+flagMode=!flagMode;
+
+msg.innerText=
+flagMode?
+"🚩 插旗模式":
+"⛏ 挖掘模式";
+
+}
+
+
+
+function createBoard(){
+
+board=[];
+cells=[];
+
+boardDiv.innerHTML="";
+
+boardDiv.style.gridTemplateColumns=
+`repeat(${cols},36px)`;
+
+
+for(let y=0;y<rows;y++){
+
+board[y]=[];
+
+for(let x=0;x<cols;x++){
+
+board[y][x]={
+mine:false,
+open:false,
+flag:false,
+num:0
+};
+
+}
+
+}
+
+
+
+let mines=0;
+
+while(mines<mineCount){
+
+let x=Math.floor(Math.random()*cols);
+let y=Math.floor(Math.random()*rows);
+
+if(!board[y][x].mine){
+
+board[y][x].mine=true;
+mines++;
+
+}
+
+}
+
+
+
+for(let y=0;y<rows;y++){
+
+for(let x=0;x<cols;x++){
+
+if(!board[y][x].mine){
+
+board[y][x].num=countMine(x,y);
+
+}
+
+}
+
+}
+
+
+
+for(let y=0;y<rows;y++){
+
+for(let x=0;x<cols;x++){
+
+let cell=document.createElement("div");
+
+cell.className="cell";
+
+
+cell.onclick=()=>{
+
+if(flagMode)
+flag(x,y);
+else
+open(x,y);
+
+};
+
+
+cell.oncontextmenu=e=>{
+
+e.preventDefault();
+
+flag(x,y);
+
+};
+
+
+cells.push(cell);
+
+boardDiv.appendChild(cell);
+
+}
+
+}
+
+}
+
+
+
+function countMine(x,y){
+
+let n=0;
+
+for(let dy=-1;dy<=1;dy++){
+
+for(let dx=-1;dx<=1;dx++){
+
+let c=board[y+dy]?.[x+dx];
+
+if(c&&c.mine)
+n++;
+
+}
+
+}
+
+return n;
+
+}
+
+
+
+function getCell(x,y){
+
+return cells[y*cols+x];
+
+}
+
+
+
+function open(x,y){
+
+if(gameOver)
+return;
+
+
+let c=board[y][x];
+
+
+if(c.open||c.flag)
+return;
+
+
+c.open=true;
+
+
+let dom=getCell(x,y);
+
+dom.classList.add("open");
+
+
+if(c.mine){
+
+dom.innerText="💣";
+
+dom.classList.add("mine");
+
+showMines();
+
+end(false);
+
+return;
+
+}
+
+
+
+if(c.num){
+
+dom.innerText=c.num;
+
+}else{
+
+
+for(let dy=-1;dy<=1;dy++){
+
+for(let dx=-1;dx<=1;dx++){
+
+let nx=x+dx;
+let ny=y+dy;
+
+
+if(board[ny]?.[nx]&&!board[ny][nx].open){
+
+open(nx,ny);
+
+}
+
+}
+
+}
+
+}
+
+
+checkWin();
+
+}
+
+
+
+function flag(x,y){
+
+if(gameOver)
+return;
+
+
+let c=board[y][x];
+
+
+if(c.open)
+return;
+
+
+c.flag=!c.flag;
+
+
+let dom=getCell(x,y);
+
+
+if(c.flag){
+
+dom.innerText="🚩";
+
+dom.classList.add("flag");
+
+}else{
+
+dom.innerText="";
+
+dom.classList.remove("flag");
+
+}
+
+}
+
+
+
+function showMines(){
+
+for(let y=0;y<rows;y++){
+
+for(let x=0;x<cols;x++){
+
+if(board[y][x].mine){
+
+let dom=getCell(x,y);
+
+dom.innerText="💣";
+
+dom.classList.add("mine");
+
+}
+
+}
+
+}
+
+}
+
+
+
+function checkWin(){
+
+let open=0;
+
+
+for(let y=0;y<rows;y++){
+
+for(let x=0;x<cols;x++){
+
+if(board[y][x].open)
+open++;
+
+}
+
+}
+
+
+if(open===rows*cols-mineCount){
+
+end(true);
+
+}
+
+}
+
+
+
+function end(win){
+
+gameOver=true;
+
+clearInterval(timer);
+
+
+if(win){
+
+let old=localStorage.getItem("mineBest");
+
+
+if(!old||seconds<Number(old)){
+
+localStorage.setItem(
+"mineBest",
+seconds
+);
+
+}
+
+
+msg.innerText="🎉 扫雷成功！";
+
+
+}else{
+
+msg.innerText="💥 游戏失败！";
+
+}
+
+
+
+bestText.innerText=
+localStorage.getItem("mineBest")||"-";
+
+
+document.querySelector(".container").animate(
+[
+{transform:"scale(1)"},
+{transform:"scale(1.05)"},
+{transform:"scale(1)"}
+],
+{
+duration:400
+}
+);
+
+}
+
+
+bestText.innerText=
+localStorage.getItem("mineBest")||"-";
+
+
+restart();
+// ===== 流星雨系统 =====
+
+const canvas=document.getElementById("particles");
+const ctx=canvas.getContext("2d");
+
+function resize(){
+canvas.width=innerWidth;
+canvas.height=innerHeight;
+}
+resize();
+
+window.addEventListener("resize",resize);
+
+
+let meteors=[];
+let comets=[];
+
+
+class Meteor{
+
+constructor(){
+this.reset();
+}
+
+reset(){
+
+this.x=Math.random()*canvas.width;
+this.y=Math.random()*canvas.height*.35;
+
+this.speed=Math.random()*5+5;
+
+this.angle=Math.PI/3;
+
+this.length=Math.random()*120+80;
+
+this.size=Math.random()*2+1;
+
+}
+
+
+update(){
+
+this.x+=Math.cos(this.angle)*this.speed;
+this.y+=Math.sin(this.angle)*this.speed;
+
+
+if(
+this.x>canvas.width||
+this.y>canvas.height
+){
+
+this.reset();
+
+}
+
+}
+
+
+draw(){
+
+let g=ctx.createLinearGradient(
+this.x,
+this.y,
+this.x-Math.cos(this.angle)*this.length,
+this.y-Math.sin(this.angle)*this.length
+);
+
+
+g.addColorStop(
+0,
+"rgba(208,188,255,.9)"
+);
+
+g.addColorStop(
+1,
+"rgba(208,188,255,0)"
+);
+
+
+ctx.strokeStyle=g;
+ctx.lineWidth=this.size;
+
+
+ctx.beginPath();
+
+ctx.moveTo(
+this.x,
+this.y
+);
+
+
+ctx.lineTo(
+this.x-Math.cos(this.angle)*this.length,
+this.y-Math.sin(this.angle)*this.length
+);
+
+
+ctx.stroke();
+
+}
+
+}
+
+
+
+class Comet{
+
+constructor(){
+
+this.reset();
+
+}
+
+
+reset(){
+
+this.x=-400;
+
+this.y=Math.random()*canvas.height*.45;
+
+this.speed=2.5;
+
+this.angle=Math.PI/4;
+
+this.length=650;
+
+this.size=8;
+
+}
+
+
+
+update(){
+
+this.x+=Math.cos(this.angle)*this.speed;
+
+this.y+=Math.sin(this.angle)*this.speed;
+
+
+if(
+this.x>canvas.width+700||
+this.y>canvas.height+700
+){
+
+this.reset();
+
+}
+
+}
+
+
+
+draw(){
+
+let g=ctx.createLinearGradient(
+this.x,
+this.y,
+this.x-Math.cos(this.angle)*this.length,
+this.y-Math.sin(this.angle)*this.length
+);
+
+
+g.addColorStop(
+0,
+"white"
+);
+
+g.addColorStop(
+.15,
+"rgba(208,188,255,.9)"
+);
+
+g.addColorStop(
+1,
+"rgba(208,188,255,0)"
+);
+
+
+
+ctx.strokeStyle=g;
+
+ctx.lineWidth=this.size;
+
+
+ctx.beginPath();
+
+ctx.moveTo(
+this.x,
+this.y
+);
+
+
+ctx.lineTo(
+this.x-Math.cos(this.angle)*this.length,
+this.y-Math.sin(this.angle)*this.length
+);
+
+
+ctx.stroke();
+
+
+
+ctx.shadowBlur=40;
+
+ctx.shadowColor="#D0BCFF";
+
+ctx.fillStyle="white";
+
+
+ctx.beginPath();
+
+ctx.arc(
+this.x,
+this.y,
+this.size,
+0,
+Math.PI*2
+);
+
+
+ctx.fill();
+
+
+ctx.shadowBlur=0;
+
+}
+
+}
+
+
+
+let meteorCount=
+innerWidth<700?18:40;
+
+
+for(let i=0;i<meteorCount;i++){
+
+meteors.push(
+new Meteor()
+);
+
+}
+
+
+
+for(let i=0;i<2;i++){
+
+comets.push(
+new Comet()
+);
+
+}
+
+
+
+function starAnimation(){
+
+ctx.clearRect(
+0,
+0,
+canvas.width,
+canvas.height
+);
+
+
+
+meteors.forEach(m=>{
+
+m.update();
+
+m.draw();
+
+});
+
+
+
+comets.forEach(c=>{
+
+c.update();
+
+c.draw();
+
+});
+
+
+
+requestAnimationFrame(
+starAnimation
+);
+
+}
+
+
+starAnimation();
+
+</script>
+
+</body>
+</html>url("../../assets/wallpaper.jpg");
 background-size:cover;
 background-position:center;
 animation:bgMove 20s infinite alternate;
