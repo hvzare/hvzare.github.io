@@ -1,310 +1,1881 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
+
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
 <title>HVZARE Studio</title>
+
+
 <style>
-:root{--primary:#D0BCFF;--surface:rgba(255,255,255,.13);--border:rgba(255,255,255,.2)}
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{font-family:"Google Sans","Microsoft YaHei",sans-serif;background:#141218;color:white;overflow-x:hidden}
-#particles{position:fixed;inset:0;z-index:-1;pointer-events:none}
-.wallpaper{position:fixed;inset:-80px;z-index:-2;background:linear-gradient(rgba(20,18,24,.35),rgba(20,18,24,.85)),url("./assets/wallpaper.jpg");background-size:cover;background-position:center;transform-origin:center;will-change:transform}
-.nav{position:fixed;top:20px;left:50%;transform:translateX(-50%);width:min(900px,90%);padding:15px 25px;display:flex;justify-content:space-between;align-items:center;background:var(--surface);backdrop-filter:blur(25px);border-radius:50px;border:1px solid var(--border);z-index:10}
-.logo{font-size:20px;font-weight:700}
-.nav a{color:white;text-decoration:none;margin-left:18px}
-.game-btn{position:fixed;top:100px;left:25px;padding:14px 22px;border-radius:50px;background:var(--surface);backdrop-filter:blur(20px);border:1px solid var(--border);color:white;text-decoration:none;z-index:10}
-.hero{height:620px;display:flex;align-items:flex-end;padding:60px}
-.hero h1{font-size:70px;letter-spacing:-3px}
-.hero p{font-size:22px;margin-top:15px;color:#ddd}
-.container{max-width:1000px;margin:auto;padding:20px}
-.card{background:var(--surface);backdrop-filter:blur(30px);border-radius:32px;padding:35px;margin-bottom:35px;border:1px solid var(--border);box-shadow:0 20px 50px #0008;opacity:0;transform:translateY(40px);transition:.6s}
-.card.show{opacity:1;transform:none}
-.card:hover{transform:translateY(-5px)}
-.card h2{font-size:28px;margin-bottom:25px}
-.card h2:before{content:"";display:inline-block;width:8px;height:30px;background:var(--primary);border-radius:10px;margin-right:12px}
-.card p{line-height:1.9;color:#eee}
-.game{display:flex;gap:30px}
-.game h3{font-size:32px;color:var(--primary)}
-.status{display:inline-block;padding:6px 14px;border-radius:20px;background:#355E3B}
-.tag{display:inline-block;padding:8px 18px;margin:6px;border-radius:50px;background:#d0bcff40;color:#EADDFF}
-.timeline{border-left:3px solid var(--primary);padding-left:25px}
-#top{position:fixed;right:25px;bottom:25px;width:55px;height:55px;border-radius:50%;background:var(--primary);color:#21005D;display:flex;align-items:center;justify-content:center;font-size:25px;text-decoration:none}
-footer{text-align:center;padding:40px;color:#aaa}
-@media(max-width:700px){.hero{height:450px;padding:30px}.hero h1{font-size:45px}.nav a{display:none}.game{flex-direction:column}.card{padding:25px}}
+
+:root{
+
+--primary:#D0BCFF;
+
+--surface:rgba(255,255,255,.13);
+
+--border:rgba(255,255,255,.2);
+
+}
+
+
+
+*{
+
+margin:0;
+
+padding:0;
+
+box-sizing:border-box;
+
+}
+
+
+
+html{
+
+scroll-behavior:smooth;
+
+}
+
+
+
+body{
+
+font-family:
+"Google Sans",
+"Microsoft YaHei",
+sans-serif;
+
+background:#141218;
+
+color:white;
+
+overflow-x:hidden;
+
+}
+
+
+
+/* =====================
+背景
+===================== */
+
+
+#particles{
+
+position:fixed;
+
+inset:0;
+
+z-index:-1;
+
+pointer-events:none;
+
+}
+
+
+
+.wallpaper{
+
+position:fixed;
+
+inset:-80px;
+
+z-index:-2;
+
+
+background:
+
+linear-gradient(
+
+rgba(20,18,24,.35),
+
+rgba(20,18,24,.85)
+
+),
+
+url("./assets/wallpaper.jpg");
+
+background-size:cover;
+
+background-position:center;
+
+
+transform-origin:center;
+
+will-change:transform;
+
+}
+
+
+
+/* =====================
+导航
+===================== */
+
+
+.nav{
+
+position:fixed;
+
+top:20px;
+
+left:50%;
+
+transform:translateX(-50%);
+
+
+width:min(900px,90%);
+
+
+padding:15px 25px;
+
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+
+background:var(--surface);
+
+backdrop-filter:blur(25px);
+
+
+border-radius:50px;
+
+border:1px solid var(--border);
+
+
+z-index:10;
+
+}
+
+
+
+.logo{
+
+font-size:20px;
+
+font-weight:700;
+
+}
+
+
+
+.nav a{
+
+color:white;
+
+text-decoration:none;
+
+margin-left:18px;
+
+}
+
+
+
+/* =====================
+侧边按钮
+===================== */
+
+
+.side-btns{
+
+position:fixed;
+
+
+top:100px;
+
+
+left:
+
+calc((100% - min(900px,90%))/2);
+
+
+display:flex;
+
+flex-direction:column;
+
+gap:15px;
+
+
+z-index:10;
+
+}
+
+
+
+.game-btn,
+.book-btn{
+
+
+width:120px;
+
+
+padding:14px 22px;
+
+
+border-radius:50px;
+
+
+background:var(--surface);
+
+
+backdrop-filter:blur(20px);
+
+
+border:1px solid var(--border);
+
+
+color:white;
+
+
+text-decoration:none;
+
+
+text-align:center;
+
+
+transition:.3s;
+
+}
+
+
+
+.game-btn:hover,
+.book-btn:hover{
+
+
+background:
+rgba(208,188,255,.25);
+
+
+transform:translateX(5px);
+
+
+}
+
+
+
+
+/* =====================
+首页
+===================== */
+
+
+.hero{
+
+
+height:620px;
+
+
+display:flex;
+
+
+align-items:flex-end;
+
+
+padding:60px;
+
+
+}
+
+
+
+.hero h1{
+
+
+font-size:70px;
+
+
+letter-spacing:-3px;
+
+
+}
+
+
+
+.hero p{
+
+
+font-size:22px;
+
+
+margin-top:15px;
+
+
+color:#ddd;
+
+
+}
+
+
+
+
+
+/* =====================
+内容
+===================== */
+
+
+.container{
+
+
+max-width:1000px;
+
+
+margin:auto;
+
+
+padding:20px;
+
+
+}
+
+
+
+.card{
+
+
+background:var(--surface);
+
+
+backdrop-filter:blur(30px);
+
+
+border-radius:32px;
+
+
+padding:35px;
+
+
+margin-bottom:35px;
+
+
+border:
+
+1px solid var(--border);
+
+
+box-shadow:
+
+0 20px 50px #0008;
+
+
+
+opacity:0;
+
+
+transform:translateY(40px);
+
+
+transition:.6s;
+
+
+}
+
+
+
+.card.show{
+
+
+opacity:1;
+
+
+transform:translateY(0);
+
+
+}
+
+
+
+.card.show:hover{
+
+
+transform:translateY(-5px);
+
+
+}
+
+
+
+.card h2{
+
+
+font-size:28px;
+
+
+margin-bottom:25px;
+
+
+}
+
+
+
+.card h2:before{
+
+
+content:"";
+
+
+display:inline-block;
+
+
+width:8px;
+
+
+height:30px;
+
+
+background:var(--primary);
+
+
+border-radius:10px;
+
+
+margin-right:12px;
+
+
+}
+
+
+
+.card p{
+
+
+line-height:1.9;
+
+
+color:#eee;
+
+
+}
+
+
+
+/* =====================
+游戏
+===================== */
+
+
+.game{
+
+
+display:flex;
+
+
+gap:30px;
+
+
+}
+
+
+
+.game h3{
+
+
+font-size:32px;
+
+
+color:var(--primary);
+
+
+}
+
+
+
+.status{
+
+
+display:inline-block;
+
+
+padding:6px 14px;
+
+
+border-radius:20px;
+
+
+background:#355E3B;
+
+
+}
+
+
+
+.tag{
+
+
+display:inline-block;
+
+
+padding:8px 18px;
+
+
+margin:6px;
+
+
+border-radius:50px;
+
+
+background:#d0bcff40;
+
+
+color:#EADDFF;
+
+
+}
+
+
+
+
+
+/* =====================
+日志
+===================== */
+
+
+.timeline{
+
+
+border-left:
+
+3px solid var(--primary);
+
+
+padding-left:25px;
+
+
+}
+
+
+
+
+/* =====================
+返回顶部
+===================== */
+
+
+#top{
+
+
+position:fixed;
+
+
+right:25px;
+
+
+bottom:25px;
+
+
+width:55px;
+
+
+height:55px;
+
+
+border-radius:50%;
+
+
+background:var(--primary);
+
+
+color:#21005D;
+
+
+display:flex;
+
+
+align-items:center;
+
+
+justify-content:center;
+
+
+font-size:25px;
+
+
+text-decoration:none;
+
+
+z-index:20;
+
+
+}
+
+
+
+
+footer{
+
+
+text-align:center;
+
+
+padding:40px;
+
+
+color:#aaa;
+
+
+}
+
+
+
+
+.card a{
+
+
+color:#D0BCFF;
+
+
+}
+
+
+
+
+
+/* =====================
+手机适配
+===================== */
+
+
+@media(max-width:700px){
+
+
+.hero{
+
+
+height:450px;
+
+
+padding:30px;
+
+
+}
+
+
+
+.hero h1{
+
+
+font-size:45px;
+
+
+}
+
+
+
+.nav a{
+
+
+display:none;
+
+
+}
+
+
+
+.side-btns{
+
+
+left:20px;
+
+
+}
+
+
+
+.game{
+
+
+flex-direction:column;
+
+
+}
+
+
+
+.card{
+
+
+padding:25px;
+
+
+}
+
+
+
+}
+
 </style>
+
 </head>
+
+
 <body>
+
+
 <canvas id="particles"></canvas>
+
+
 <div class="wallpaper" id="wallpaper"></div>
 
+
+
 <nav class="nav">
-<div class="logo">HVZARE Studio</div>
-<div>
-<a href="#about">关于</a>
-<a href="#game">游戏</a>
-<a href="#log">日志</a>
-<a href="#contact">联系</a>
+
+
+<div class="logo">
+
+HVZARE Studio
+
 </div>
+
+
+<div>
+
+<a href="#about">关于</a>
+
+<a href="#game">游戏</a>
+
+<a href="#log">日志</a>
+
+<a href="#contact">联系</a>
+
+</div>
+
+
 </nav>
 
-<a class="game-btn" href="./game.html">🎮</a>
+
+
+<div class="side-btns">
+
+
+<a class="game-btn" href="./game.html">
+
+🎮 游戏
+
+</a>
+
+
+
+<a class="book-btn" href="./readbook.html">
+
+📖 阅读
+
+</a>
+
+
+</div>
+
+
 
 <header class="hero">
+
+
 <div>
-<h1>HVZARE Studio</h1>
-<p>Independent Developer · Creating Worlds & Memories</p>
+
+
+<h1>
+
+HVZARE Studio
+
+</h1>
+
+
+<p>
+
+Independent Developer · Creating Worlds & Memories
+
+</p>
+
+
 </div>
+
+
 </header>
 
-<main class="container">
 
-<section class="card" id="about">
-<h2>关于开发者</h2>
-<p>你好，我是 HVZARE。<br><br>一名独立开发者。<br>专注于 Godot 游戏开发、Android 软件以及数字创造。<br><br>目标：<br>创造拥有故事与灵魂的作品。</p>
+
+<main class="container">
+  <section class="card" id="about">
+
+<h2>
+关于开发者
+</h2>
+
+
+<p>
+
+你好，我是 HVZARE。<br><br>
+
+
+一名独立开发者。<br>
+
+
+专注于 Godot 游戏开发、Android 软件以及数字创造。<br><br>
+
+
+目标：<br>
+
+
+创造拥有故事与灵魂的作品。
+
+
+</p>
+
 </section>
+
+
+
+
 
 <section class="card" id="game">
-<h2>正在开发</h2>
+
+
+<h2>
+
+正在开发
+
+</h2>
+
+
+
 <div class="game">
+
+
 <div>
-<div class="status">🟢 开发中</div>
-<h3>none</h3>
-<p>横版地牢探索 Roguelike 游戏。<br>玩家将在世界中探索，寻找伙伴、武器，建设属于自己的避难所。</p>
-<span class="tag">Roguelike</span>
-<span class="tag">Godot</span>
-<span class="tag">Android</span>
-<span class="tag">Pixel Art</span>
+
+
+<div class="status">
+
+🟢 开发中
+
 </div>
+
+
+
+<h3>
+
+none
+
+</h3>
+
+
+
+<p>
+
+横版地牢探索 Roguelike 游戏。<br>
+
+
+玩家将在世界中探索，寻找伙伴、武器，
+
+
+建设属于自己的避难所。
+
+</p>
+
+
+
+
+<span class="tag">
+
+Roguelike
+
+</span>
+
+
+
+<span class="tag">
+
+Godot
+
+</span>
+
+
+
+<span class="tag">
+
+Android
+
+</span>
+
+
+
+<span class="tag">
+
+Pixel Art
+
+</span>
+
+
+
 </div>
+
+
+</div>
+
+
 </section>
+
+
+
+
+
 
 <section class="card" id="log">
-<h2>开发日志</h2>
+
+
+<h2>
+
+开发日志
+
+</h2>
+
+
+
 <div class="timeline">
-<div><h3>2026.08</h3><p>完成核心玩法设计。</p></div>
-<div><h3>2026.07</h3><p>开始 Godot 游戏开发。</p></div>
-<div><h3>未来计划</h3><p>✔ 避难所系统<br>✔ NPC 招募<br>✔ 技能树<br>✔ 武器成长</p></div>
+
+
+<div>
+
+
+<h3>
+
+2026.08
+
+</h3>
+
+
+<p>
+
+完成核心玩法设计。
+
+</p>
+
+
 </div>
+
+
+
+
+<div>
+
+
+<h3>
+
+2026.07
+
+</h3>
+
+
+<p>
+
+开始 Godot 游戏开发。
+
+</p>
+
+
+</div>
+
+
+
+
+
+<div>
+
+
+<h3>
+
+未来计划
+
+</h3>
+
+
+<p>
+
+
+✔ 避难所系统
+
+<br>
+
+
+✔ NPC 招募
+
+<br>
+
+
+✔ 技能树
+
+<br>
+
+
+✔ 武器成长
+
+
+</p>
+
+
+</div>
+
+
+</div>
+
+
 </section>
+
+
+
+
+
+
 
 <section class="card">
-<h2>技术能力</h2>
-<span class="tag">Godot</span>
-<span class="tag">GDScript</span>
-<span class="tag">Kotlin</span>
-<span class="tag">Linux</span>
-<span class="tag">Git</span>
+
+
+<h2>
+
+技术能力
+
+</h2>
+
+
+
+<span class="tag">
+
+Godot
+
+</span>
+
+
+<span class="tag">
+
+GDScript
+
+</span>
+
+
+
+<span class="tag">
+
+Kotlin
+
+</span>
+
+
+
+<span class="tag">
+
+Linux
+
+</span>
+
+
+
+<span class="tag">
+
+Git
+
+</span>
+
+
 </section>
 
+
+
+
+
+
+
 <section class="card" id="contact">
-<h2>联系</h2>
-<p>Email:<br>hvzare81@gmail.com</p>
+
+
+<h2>
+
+联系
+
+</h2>
+
+
+
+<p>
+
+
+Email:
+
+<br>
+
+
+
+<a href="mailto:hvzare81@gmail.com">
+
+hvzare81@gmail.com
+
+</a>
+
+
+
+</p>
+
+
 </section>
+
+
+
 
 </main>
 
-<a id="top" href="#">↑</a>
 
-<footer>© 2026 HVZARE Studio</footer>
+
+
+
+<a id="top" href="#">
+
+↑
+
+</a>
+
+
+
+
+<footer>
+
+
+© 2026 HVZARE Studio
+
+
+</footer>
+
+
+
+
 
 <script>
-const wallpaper=document.getElementById("wallpaper");
-let scale=1,target=1,scrollPower=0;
 
-window.addEventListener("scroll",()=>{
-target=1+Math.min(scrollY/2500,.3);
-scrollPower=Math.min(scrollY/1500,1);
+
+// ===============================
+// 动态壁纸缩放
+// ===============================
+
+
+const wallpaper =
+document.getElementById("wallpaper");
+
+
+
+let scale=1;
+
+let target=1;
+
+let scrollPower=0;
+
+
+
+
+window.addEventListener(
+"scroll",
+()=>{
+
+
+target =
+1 + Math.min(scrollY / 2500,.3);
+
+
+
+scrollPower =
+Math.min(scrollY / 1500,1);
+
+
+
 });
+
+
+
+
 
 function bgAnim(){
-scale+=(target-scale)*.08;
-wallpaper.style.transform=`scale(${scale})`;
+
+
+scale +=
+(target-scale)*0.08;
+
+
+
+wallpaper.style.transform =
+`scale(${scale})`;
+
+
+
 requestAnimationFrame(bgAnim);
+
+
 }
+
+
+
 bgAnim();
 
-const cards=document.querySelectorAll(".card");
-const observer=new IntersectionObserver(e=>{
-e.forEach(x=>{
-if(x.isIntersecting)x.target.classList.add("show");
-});
-});
-cards.forEach(c=>observer.observe(c));
 
 
-const canvas=document.getElementById("particles");
-const ctx=canvas.getContext("2d");
+
+
+// ===============================
+// 卡片进入动画
+// ===============================
+
+
+const cards =
+document.querySelectorAll(".card");
+
+
+
+const observer =
+new IntersectionObserver(
+entries=>{
+
+
+entries.forEach(
+item=>{
+
+
+if(item.isIntersecting){
+
+
+item.target.classList.add("show");
+
+
+}
+
+
+});
+
+
+});
+
+
+
+cards.forEach(
+card=>observer.observe(card)
+);
+
+
+
+
+
+
+// ===============================
+// 粒子系统初始化
+// ===============================
+
+
+const canvas =
+document.getElementById("particles");
+
+
+const ctx =
+canvas.getContext("2d");
+
+
+
 
 function resize(){
-canvas.width=innerWidth;
-canvas.height=innerHeight;
+
+
+canvas.width =
+innerWidth;
+
+
+canvas.height =
+innerHeight;
+
+
 }
+
+
+
 resize();
-addEventListener("resize",resize);
 
 
-let meteors=[],comets=[];
+
+addEventListener(
+"resize",
+resize
+);
+
+
+
+
+let meteors=[];
+
+let comets=[];
+// ===============================
+// 流星
+// ===============================
 
 
 class Meteor{
+
+
 constructor(){
+
 this.reset();
+
 }
+
+
 
 reset(){
-this.x=Math.random()*canvas.width*.7;
-this.y=Math.random()*canvas.height*.15;
-this.speed=Math.random()*5+5+scrollPower*10;
-this.angle=Math.PI/3;
-this.length=Math.random()*100+80;
-this.size=Math.random()*2+1;
+
+
+this.x =
+Math.random()*canvas.width*.7;
+
+
+this.y =
+Math.random()*canvas.height*.15;
+
+
+
+this.speed =
+Math.random()*5+5+scrollPower*10;
+
+
+
+this.angle =
+Math.PI/3;
+
+
+
+this.length =
+Math.random()*100+80;
+
+
+
+this.size =
+Math.random()*2+1;
+
+
 }
+
+
+
 
 update(){
-this.speed=Math.random()*5+5+scrollPower*10;
-this.x+=Math.cos(this.angle)*this.speed;
-this.y+=Math.sin(this.angle)*this.speed;
 
-if(this.x>canvas.width||this.y>canvas.height)this.reset();
+
+this.x +=
+Math.cos(this.angle)*this.speed;
+
+
+
+this.y +=
+Math.sin(this.angle)*this.speed;
+
+
+
+if(
+this.x>canvas.width ||
+this.y>canvas.height
+){
+
+
+this.reset();
+
+
 }
+
+
+
+}
+
+
+
 
 draw(){
-let g=ctx.createLinearGradient(
+
+
+let g =
+ctx.createLinearGradient(
+
 this.x,
+
 this.y,
-this.x-Math.cos(this.angle)*this.length,
-this.y-Math.sin(this.angle)*this.length
+
+this.x-
+Math.cos(this.angle)*this.length,
+
+this.y-
+Math.sin(this.angle)*this.length
+
 );
 
-g.addColorStop(0,"rgba(208,188,255,.95)");
-g.addColorStop(1,"rgba(208,188,255,0)");
+
+
+g.addColorStop(
+0,
+"rgba(208,188,255,.95)"
+);
+
+
+
+g.addColorStop(
+1,
+"rgba(208,188,255,0)"
+);
+
+
 
 ctx.strokeStyle=g;
+
+
+
 ctx.lineWidth=this.size;
 
+
+
 ctx.beginPath();
-ctx.moveTo(this.x,this.y);
-ctx.lineTo(
-this.x-Math.cos(this.angle)*this.length,
-this.y-Math.sin(this.angle)*this.length
+
+
+
+ctx.moveTo(
+this.x,
+this.y
 );
+
+
+
+ctx.lineTo(
+
+this.x-
+Math.cos(this.angle)*this.length,
+
+this.y-
+Math.sin(this.angle)*this.length
+
+);
+
+
+
 ctx.stroke();
-}
+
+
+
 }
 
+
+}
+
+
+
+
+
+
+
+
+// ===============================
+// 彗星
+// ===============================
 
 
 class Comet{
+
+
 constructor(){
+
 this.reset();
+
 }
+
+
+
 
 reset(){
+
+
 this.x=-300;
-this.y=Math.random()*canvas.height*.4;
-this.speed=2+scrollPower*3;
-this.angle=Math.PI/4;
-this.length=600;
-this.size=7;
+
+
+this.y=
+Math.random()*canvas.height*.4;
+
+
+
+this.speed=
+2+Math.random()*2;
+
+
+
+this.angle=
+Math.PI/4;
+
+
+
+this.length=
+600;
+
+
+
+this.size=
+7;
+
+
 }
+
+
+
 
 update(){
-this.speed=2+scrollPower*3;
 
-this.x+=Math.cos(this.angle)*this.speed;
-this.y+=Math.sin(this.angle)*this.speed;
 
-if(this.x>canvas.width+600||this.y>canvas.height+600)
+this.x +=
+Math.cos(this.angle)*this.speed;
+
+
+
+this.y +=
+Math.sin(this.angle)*this.speed;
+
+
+
+if(
+
+this.x >
+canvas.width+600 ||
+
+this.y >
+canvas.height+600
+
+){
+
+
 this.reset();
+
+
 }
+
+
+
+}
+
+
+
+
 
 draw(){
 
-let g=ctx.createLinearGradient(
+
+
+let g =
+ctx.createLinearGradient(
+
 this.x,
+
 this.y,
-this.x-Math.cos(this.angle)*this.length,
-this.y-Math.sin(this.angle)*this.length
+
+this.x-
+Math.cos(this.angle)*this.length,
+
+this.y-
+Math.sin(this.angle)*this.length
+
 );
 
-g.addColorStop(0,"white");
-g.addColorStop(.15,"rgba(208,188,255,.9)");
-g.addColorStop(1,"rgba(208,188,255,0)");
+
+
+
+g.addColorStop(
+0,
+"white"
+);
+
+
+
+g.addColorStop(
+.15,
+"rgba(208,188,255,.9)"
+);
+
+
+
+g.addColorStop(
+1,
+"rgba(208,188,255,0)"
+);
+
+
+
 
 ctx.strokeStyle=g;
+
+
+
 ctx.lineWidth=this.size;
 
+
+
 ctx.beginPath();
-ctx.moveTo(this.x,this.y);
-ctx.lineTo(
-this.x-Math.cos(this.angle)*this.length,
-this.y-Math.sin(this.angle)*this.length
+
+
+
+ctx.moveTo(
+this.x,
+this.y
 );
+
+
+
+ctx.lineTo(
+
+this.x-
+Math.cos(this.angle)*this.length,
+
+this.y-
+Math.sin(this.angle)*this.length
+
+);
+
+
+
 ctx.stroke();
 
 
+
+
+
 ctx.shadowBlur=35;
+
+
+
 ctx.shadowColor="#D0BCFF";
+
+
+
 ctx.fillStyle="white";
 
+
+
 ctx.beginPath();
-ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+
+
+
+ctx.arc(
+
+this.x,
+
+this.y,
+
+this.size,
+
+0,
+
+Math.PI*2
+
+);
+
+
+
 ctx.fill();
 
+
+
 ctx.shadowBlur=0;
+
+
+
 }
+
+
 }
 
 
 
-let baseCount=innerWidth<700?15:35;
 
-for(let i=0;i<baseCount;i++)
-meteors.push(new Meteor());
 
-for(let i=0;i<2;i++)
-comets.push(new Comet());
+
+
+// ===============================
+// 初始化
+// ===============================
+
+
+
+let baseCount =
+innerWidth < 700 ? 15 : 35;
+
+
+
+
+for(
+let i=0;
+i<baseCount;
+i++
+){
+
+
+meteors.push(
+new Meteor()
+);
+
+
+}
+
+
+
+
+for(
+let i=0;
+i<2;
+i++
+){
+
+
+comets.push(
+new Comet()
+);
+
+
+}
+
+
+
+
 
 
 let lastAdd=0;
 
+
+
+
 function addMeteor(){
 
-let max=baseCount+Math.floor(scrollPower*50);
 
-if(meteors.length<max&&Date.now()-lastAdd>250){
-meteors.push(new Meteor());
-lastAdd=Date.now();
+
+let max =
+baseCount+
+Math.floor(scrollPower*50);
+
+
+
+if(
+
+meteors.length < max &&
+
+Date.now()-lastAdd>250
+
+){
+
+
+meteors.push(
+new Meteor()
+);
+
+
+
+lastAdd =
+Date.now();
+
+
+
 }
 
+
 }
+
+
+
+
+
+
+
+// ===============================
+// 动画循环
+// ===============================
 
 
 
 function animate(){
 
-ctx.clearRect(0,0,canvas.width,canvas.height);
+
+
+ctx.clearRect(
+
+0,
+
+0,
+
+canvas.width,
+
+canvas.height
+
+);
+
+
+
 
 addMeteor();
 
-meteors.forEach(m=>{
+
+
+
+
+meteors.forEach(
+m=>{
+
+
 m.update();
+
 m.draw();
+
+
 });
 
-comets.forEach(c=>{
+
+
+
+
+
+comets.forEach(
+c=>{
+
+
 c.update();
+
 c.draw();
+
+
 });
 
-requestAnimationFrame(animate);
+
+
+
+
+requestAnimationFrame(
+animate
+);
+
+
 
 }
 
+
+
 animate();
 
+
+
 </script>
+
+
+
 </body>
+
 </html>
