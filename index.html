@@ -287,85 +287,96 @@ padding:25px
 <a id="top" href="#">↑</a>
 <footer>© 2026 HVZARE Studio</footer>
 <script>
+
 const wallpaper=document.getElementById("wallpaper");
 
-/* Bing每日壁纸 */
-fetch("https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1")
-.then(res=>res.json())
-.then(data=>{
 
-    const img="https://www.bing.com"+data.images[0].url;
+/* =====================
+   Bing每日壁纸
+===================== */
 
-    wallpaper.style.backgroundImage=
-    `
-    linear-gradient(
-    rgba(20,18,24,.35),
-    rgba(20,18,24,.85)
-    ),
-    url("${img}")
-    `;
-
-})
-.catch(()=>{
-    wallpaper.style.backgroundImage=
-    `
-    linear-gradient(
-    rgba(20,18,24,.35),
-    rgba(20,18,24,.85)
-    ),
-    url("https://api.dujin.org/bing/1920.php")
-    `;
-});
+const bingWallpaper=
+"https://api.dujin.org/bing/1920.php";
 
 
-/* 壁纸缩放动画 */
+wallpaper.style.backgroundImage=
+`
+linear-gradient(
+rgba(20,18,24,.35),
+rgba(20,18,24,.85)
+),
+url("${bingWallpaper}")
+`;
+
+
+
+/* =====================
+   壁纸滚动缩放
+===================== */
+
 let target=1;
 let current=1;
 
+
 window.addEventListener("scroll",()=>{
-target=1+Math.min(window.scrollY/2500,.3)
+
+target=1+Math.min(
+window.scrollY/2500,
+.3
+);
+
 });
 
+
 function animate(){
+
 current+=(target-current)*.08;
-wallpaper.style.transform=`scale(${current})`;
-requestAnimationFrame(animate)
+
+wallpaper.style.transform=
+`scale(${current})`;
+
+requestAnimationFrame(animate);
+
 }
+
 
 animate();
 
 
-/* 卡片出现动画 */
-const cards=document.querySelectorAll(".card");
 
-const observer=new IntersectionObserver(items=>{
+/* =====================
+   卡片出现动画
+===================== */
+
+const cards=
+document.querySelectorAll(".card");
+
+
+const observer=
+new IntersectionObserver(items=>{
+
 items.forEach(item=>{
+
 if(item.isIntersecting){
-item.target.classList.add("show")
+
+item.target.classList.add("show");
+
 }
-})
+
 });
 
-cards.forEach(card=>observer.observe(card));
-let current=1;
-window.addEventListener("scroll",()=>{
-target=1+Math.min(window.scrollY/2500,.3)
 });
-function animate(){
-current+=(target-current)*.08;
-wallpaper.style.transform=`scale(${current})`;
-requestAnimationFrame(animate)
-}
-animate();
-const cards=document.querySelectorAll(".card");
-const observer=new IntersectionObserver(items=>{
-items.forEach(item=>{
-if(item.isIntersecting){
-item.target.classList.add("show")
-}
-})
+
+
+
+cards.forEach(card=>{
+
+observer.observe(card);
+
 });
-cards.forEach(card=>observer.observe(card));
+
+
+
 </script>
 </body>
 </html>
