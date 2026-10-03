@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>跳一跳 · Expressive</title>
+<style>
+:root{
+  --bg:#fef7ff;--surf:#f3edf7;--surf-hi:#e6e0e9;--surf-lo:#f7f2fa;--on:#1d1b20;--on-v:#49454f;
+  --pri:#6750a4;--on-pri:#fff;--pri-c:#eaddff;--on-pri-c:#21005d;
+  --sec-c:#e8def8;--ter-c:#ffd8e4;--on-ter-c:#31111d;
+  --spring:cubic-bezier(.34,1.56,.64,1);
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141218;--surf:#211f26;--surf-hi:#2b2930;--surf-lo:#26242b;--on:#e6e0e9;--on-v:#cac4d0;
+  --pri:#d0bcff;--on-pri:#381e72;--pri-c:#4f378b;--on-pri-c:#eaddff;--sec-c:#4a4458;--ter-c:#633b48;--on-ter-c:#ffd8e4}}
+:root[data-theme="dark"]{
+  --bg:#141218;--surf:#211f26;--surf-hi:#2b2930;--surf-lo:#26242b;--on:#e6e0e9;--on-v:#cac4d0;
+  --pri:#d0bcff;--on-pri:#381e72;--pri-c:#4f378b;--on-pri-c:#eaddff;--sec-c:#4a4458;--ter-c:#633b48;--on-ter-c:#ffd8e4}
+*{box-sizing:border-box;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{margin:0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:var(--on);font-family:"Google Sans Flex","Google Sans","Segoe UI","PingFang SC","Noto Sans SC",system-ui,sans-serif;min-height:100%;display:flex;justify-content:center}
+.app{width:100%;max-width:500px;padding:16px 16px 28px;display:flex;flex-direction:column;gap:14px}
+h1{margin:6px 4px 0;font-size:30px;font-weight:700;letter-spacing:-.5px}
+.top{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center}
+.stat{background:var(--pri-c);color:var(--on-pri-c);border-radius:28px;padding:10px 16px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;display:flex;gap:8px;justify-content:center;align-items:center;transition:transform .3s var(--spring)}
+.stat.t{background:var(--ter-c);color:var(--on-ter-c)}
+.stat small{font-size:18px}.stat.bump{transform:scale(1.15)}
+.round{width:68px;height:68px;border:0;font-size:30px;background:var(--pri);color:var(--on-pri);border-radius:50%;cursor:pointer;transition:border-radius .5s var(--spring),transform .4s var(--spring);display:grid;place-items:center}
+.round:hover{border-radius:30%}.round:active{transform:scale(.88);border-radius:42%}
+.spin{animation:spin .6s var(--spring)}
+@keyframes spin{from{transform:rotate(-200deg) scale(.5)}to{transform:none}}
+.seg{display:flex;background:var(--surf);border-radius:999px;padding:4px;position:relative}
+.seg button{flex:1;border:0;background:none;color:var(--on-v);font:600 15px inherit;font-family:inherit;padding:11px 0;border-radius:999px;cursor:pointer;position:relative;z-index:1;transition:color .3s}
+.seg button.on{color:var(--on-pri)}
+.seg i{position:absolute;top:4px;bottom:4px;left:4px;width:calc((100% - 8px)/3);background:var(--pri);border-radius:999px;transition:transform .5s var(--spring)}
+.wrap{background:var(--surf);border-radius:36px;padding:10px;position:relative}
+.wrap.shake{animation:shake .6s}
+@keyframes shake{10%,90%{transform:translate(-3px,1px)}20%,80%{transform:translate(5px,-2px)}30%,50%,70%{transform:translate(-8px,2px)}40%,60%{transform:translate(8px,-1px)}}
+canvas{display:block;width:100%;aspect-ratio:6/7;border-radius:28px;touch-action:none;cursor:pointer}
+.start{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+.start span{background:var(--pri);color:var(--on-pri);padding:14px 26px;border-radius:999px;font-weight:700;font-size:16px;animation:float 1.6s var(--spring) infinite alternate}
+.start.hide{display:none}
+@keyframes float{from{transform:translateY(0) scale(1);border-radius:999px}to{transform:translateY(-8px) scale(1.06);border-radius:20px}}
+.tools{display:flex;gap:10px}
+.fab{flex:1;border:0;height:56px;border-radius:20px;background:var(--sec-c);color:var(--on-pri-c);font:700 16px inherit;font-family:inherit;cursor:pointer;transition:border-radius .45s var(--spring),transform .3s var(--spring)}
+.fab:active{transform:scale(.94);border-radius:28px}
+.ic{width:56px;height:56px;border:0;border-radius:50%;background:var(--surf);color:var(--on-v);font-size:22px;cursor:pointer;transition:border-radius .45s var(--spring),background .3s,transform .3s var(--spring)}
+.ic.on{background:var(--pri-c);border-radius:20px;color:var(--on-pri-c)}
+.ic:active{transform:scale(.88)}
+.hint{margin:0 6px;text-align:center;color:var(--on-v);font-size:13px}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;place-items:center;padding:24px;z-index:9;opacity:0}
+.scrim.show{display:grid;animation:fade .3s forwards}
+@keyframes fade{to{opacity:1}}
+.dlg{background:var(--surf-lo);border-radius:36px;padding:28px 24px 20px;max-width:340px;width:100%;text-align:center;animation:dlg .6s var(--spring)}
+@keyframes dlg{from{transform:scale(.6) translateY(40px);opacity:0}}
+.dlg .big{font-size:56px;animation:spin .8s var(--spring)}
+.dlg h2{margin:6px 0;font-size:26px}.dlg p{margin:0 0 20px;color:var(--on-v);line-height:1.5}
+.dlg button{border:0;background:var(--pri);color:var(--on-pri);font:700 16px inherit;font-family:inherit;padding:14px 32px;border-radius:999px;cursor:pointer;transition:border-radius .4s var(--spring),transform .3s var(--spring)}
+.dlg button:hover{border-radius:16px}.dlg button:active{transform:scale(.92)}
+button:focus-visible{outline:3px solid var(--pri);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>跳一跳</h1>
+  <div class="top">
+    <div class="stat" id="score"><small>⭐</small><span>0</span></div>
+    <button class="round" id="restart" aria-label="重新开始">↻</button>
+    <div class="stat t" id="best"><small>🏆</small><span>0</span></div>
+  </div>
+  <div class="wrap"><canvas id="cv"></canvas><div class="start" id="start"><span>按住蓄力 · 松开起跳</span></div></div>
+  <div class="tools">
+    <button class="fab" id="again">重新开始</button>
+    <button class="ic on" id="snd" aria-label="音效">🔊</button>
+    <button class="ic on" id="vib" aria-label="振动">📳</button>
+  </div>
+  <p class="hint">按住屏幕或空格键蓄力，按得越久跳得越远 · 落在中心点连击得分 · 得分越高越难</p>
+</div>
+<div class="scrim" id="scrim"><div class="dlg"><div class="big">😵</div><h2>游戏结束</h2><p id="dp"></p><button id="dbtn">再来一局</button></div></div>
+
+<script>
+const $=s=>document.getElementById(s),cv=$('cv'),ctx=cv.getContext('2d');
+const W=480,H=560,GY=400,R=18,PX=130,CH=1100;
+let B={x:0,y:0,vx:0,vy:0,ft:0},lastB=0,plats,ci,P,st='idle',p=0,cs0=0,x0,D,dur,tj,combo,score,best,cam,landT=9,parts=[],texts=[],rings=[],snd=true,vibOn=true,last=0,bgs=[];
+try{snd=localStorage.getItem('j-snd')!=='0';vibOn=localStorage.getItem('j-vib')!=='0'}catch(e){}
+const dark=()=>{const t=document.documentElement.dataset.theme;return t?t==='dark':matchMedia('(prefers-color-scheme:dark)').matches};
+
+/* 音效 / 振动 */
+let ac,co;
+function A(){return ac=ac||new(window.AudioContext||window.webkitAudioContext)()}
+function tone(f,d=.12,type='sine',v=.13,when=0,slide){
+  if(!snd)return;try{const a=A(),o=a.createOscillator(),G=a.createGain(),t=a.currentTime+when;
+  o.type=type;o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+d);
+  G.gain.setValueAtTime(.0001,t);G.gain.linearRampToValueAtTime(v,t+.004);G.gain.exponentialRampToValueAtTime(.001,t+d);
+  o.connect(G).connect(a.destination);o.start(t);o.stop(t+d+.02)}catch(e){}}
+const bell=(f,when=0,v=.15)=>{tone(f,.38,'sine',v,when);tone(f*2.76,.18,'sine',v*.3,when);tone(f*5.4,.08,'sine',v*.12,when)};
+const PENTA=[0,2,4,7,9],note=i=>523.25*Math.pow(2,(PENTA[i%5]+12*Math.floor(i/5%3))/12);
+const vib=q=>{if(vibOn&&navigator.vibrate){try{navigator.vibrate(q)}catch(e){}}};
+function chargeOn(){if(!snd)return;try{const a=A();co={o:a.createOscillator(),G:a.createGain()};co.o.type='triangle';co.o.frequency.value=180;co.G.gain.value=.04;co.o.connect(co.G).connect(a.destination);co.o.start()}catch(e){co=null}}
+function chargeSet(){if(co)try{co.o.frequency.value=180+p*520}catch(e){}}
+function chargeOff(){if(co){try{co.G.gain.exponentialRampToValueAtTime(.001,A().currentTime+.05);co.o.stop(A().currentTime+.06)}catch(e){}co=null}}
+const sfx={
+  jump:()=>tone(300,.25,'sine',.1,0,900),
+  land:()=>bell(note(score)),
+  perfect:c=>{bell(note(score+c*2),0,.16);bell(note(score+c*2)*1.5,.08,.12)},
+  fall:()=>{tone(500,.5,'sine',.12,0,90);[0,-4,-8,-12].forEach((x,i)=>bell(440*Math.pow(2,x/12),.25+i*.12,.1))},
+  click:()=>tone(1800,.03,'sine',.06)
+};
+
+/* 世界 */
+function hue(i){return (250+i*23)%360}
+function addPlat(){
+  // 难度随得分递增:得分越高,间距越大、平台越窄(约 80 分达到最难)
+  const l=plats[plats.length-1],d=Math.min(1,score/80),m=(a,b)=>a+(b-a)*d;
+  const c={g:[m(40,60),m(120,190)],w:[m(100,56),m(150,100)]},r=(a)=>a[0]+Math.random()*(a[1]-a[0]);
+  const w=Math.round(r(c.w)),g=Math.round(r(c.g));
+  plats.push({x:l.x+l.w/2+g+w/2,w,i:l.i+1,born:performance.now()});
+}
+function reset(){
+  score=0;plats=[{x:PX,w:130,i:0,born:0}];ci=0;addPlat();
+  P={x:PX,y:0,vy:0,vx:0};st='idle';p=0;combo=0;score=0;cam=0;landT=9;parts=[];texts=[];rings=[];
+  bgs=Array.from({length:16},()=>({x:Math.random()*1200,y:Math.random()*H,w:30+Math.random()*70,h:30+Math.random()*70}));
+  best=0;try{best=+localStorage.getItem('j-best')||0}catch(e){}
+  $('score').lastChild.textContent=0;$('best').lastChild.textContent=best;$('start').classList.remove('hide');
+  const r=$('restart');r.classList.remove('spin');void r.offsetWidth;r.classList.add('spin');
+}
+function press(){
+  if(st==='idle'){$('start').classList.add('hide');st='ready'}
+  if(st!=='ready')return;
+  st='charge';cs0=performance.now();p=0;chargeOn();vib(12);
+}
+function release(){
+  if(st!=='charge')return;
+  chargeOff();x0=P.x;D=20+p*330;dur=.45+.45*p;tj=0;st='jump';sfx.jump();
+}
+function land(){
+  const x1=x0+D,cp=plats[ci],np=plats[ci+1];P.x=x1;P.y=0;
+  if(Math.abs(x1-cp.x)<=cp.w/2){combo=0;st='ready';landT=0;tone(400,.1,'sine',.1);vib(15);return}
+  if(Math.abs(x1-np.x)<=np.w/2){
+    ci++;addPlat();landT=0;st='ready';
+    const perfect=Math.abs(x1-np.x)<=10;let gain=1;
+    if(perfect){combo++;gain=2*combo;sfx.perfect(combo);vib([20,30,40]);rings.push({x:np.x,t:0});burst(np.x,16)}else{combo=0;sfx.land();vib(22);burst(np.x,8)}
+    score+=gain;texts.push({x:x1,y:GY-70,t:0,s:'+'+gain,p:perfect});
+    const e=$('score');e.lastChild.textContent=score;e.classList.add('bump');setTimeout(()=>e.classList.remove('bump'),200);
+    if(plats.length>5){plats.shift();ci--}
+    return;
+  }
+  st='fall';B={x:x1,y:GY-R,vx:D/dur*.5,vy:0,ft:0};sfx.fall();vib([80,40,160]);
+}
+function stepBall(dt){
+  B.vy+=1500*dt;B.x+=B.vx*dt;B.y+=B.vy*dt;B.ft+=dt;P.x=B.x;
+  for(const q of plats){ // 小球与平台碰撞:按平台真实的圆角矩形外形计算
+    const l=q.x-q.w/2,r=q.x+q.w/2,t=GY,bt=GY+520,rr=Math.min(24,q.w/2),Rc=R-1;
+    const il=l+rr,ir=r-rr,it=t+rr,ib=bt-rr;
+    const cx=Math.max(il,Math.min(ir,B.x)),cy=Math.max(it,Math.min(ib,B.y)),dx=B.x-cx,dy=B.y-cy,d=Math.hypot(dx,dy);
+    if(d>=Rc+rr)continue;let nx,ny;
+    if(d<1e-6){const ds=[B.x-l,r-B.x,B.y-t,bt-B.y],m=Math.min(...ds),k=ds.indexOf(m);[nx,ny]=[[-1,0],[1,0],[0,-1],[0,1]][k];B.x+=nx*(m+Rc);B.y+=ny*(m+Rc)}
+    else{nx=dx/d;ny=dy/d;B.x+=nx*(Rc+rr-d);B.y+=ny*(Rc+rr-d)}
+    const vn=B.vx*nx+B.vy*ny;
+    if(vn<0){B.vx-=1.55*vn*nx;B.vy-=1.55*vn*ny;B.vx*=.97;
+      const now=performance.now();if(-vn>130&&now-lastB>80){lastB=now;tone(240+Math.random()*140,.09,'triangle',.08);vib(10)}}
+  }
+  if(B.y>H+60||B.ft>3)over();
+}
+function over(){if(st==='over')return;
+  st='over';const rec=score>best&&score>0;
+  if(rec){best=score;$('best').lastChild.textContent=best;try{localStorage.setItem('j-best',best)}catch(e){}}
+  const w=cv.parentNode;w.classList.remove('shake');void w.offsetWidth;w.classList.add('shake');
+  setTimeout(()=>{$('dp').textContent=`得分 ${score} · 最高 ${best}`+(rec?' · 新纪录!':'');$('scrim').classList.add('show');if(rec){[0,4,7,12].forEach((x,i)=>bell(659*Math.pow(2,x/12),i*.09,.13));vib([60,60,60,60,160])}},700);
+}
+function burst(x,n){for(let i=0;i<n;i++){const a=-Math.PI*Math.random(),s=80+Math.random()*160;parts.push({x,y:GY-4,vx:Math.cos(a)*s,vy:Math.sin(a)*s,l:1,h:hue(plats[ci]?plats[ci].i:0)})}}
+
+/* 更新与绘制 */
+function update(dt,now){
+  if(st==='charge'){p=Math.min(1,(now-cs0)/CH);chargeSet()}
+  else if(st==='jump'){tj+=dt;const t=Math.min(1,tj/dur);P.x=x0+D*t;P.y=(50+D*.4)*4*t*(1-t);if(t>=1)land()}
+  else if(st==='fall'){for(let n=0;n<3&&st==='fall';n++){stepBall(dt/3)}}
+  landT+=dt;
+  const target=P.x-PX;cam+=(target-cam)*Math.min(1,dt*5);
+  parts.forEach(q=>{q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy+=500*dt;q.l-=dt*1.6});parts=parts.filter(q=>q.l>0);
+  texts.forEach(q=>{q.t+=dt;q.y-=40*dt});texts=texts.filter(q=>q.t<1);
+  rings.forEach(q=>q.t+=dt);rings=rings.filter(q=>q.t<.7);
+}
+function draw(now){
+  const k=cv.width/W,cs=getComputedStyle(document.documentElement),dk=dark();
+  ctx.setTransform(k,0,0,k,0,0);ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle=cs.getPropertyValue('--on-v').trim();ctx.lineWidth=2;ctx.globalAlpha=.1;
+  for(const b of bgs){const x=((b.x-cam*.3)%1200+1200)%1200-120;ctx.beginPath();ctx.roundRect(x,b.y,b.w,b.h,b.w*.3);ctx.stroke()}
+  ctx.globalAlpha=1;
+  ctx.save();ctx.translate(-cam,0);
+  plats.forEach((q,n)=>{
+    const sink=(n===ci&&st==='charge')?p*12:0,age=Math.min(1,(now-q.born)/350),s=1-Math.pow(1-age,3),drop=(1-s)*-120;
+    ctx.fillStyle=`hsl(${hue(q.i)} ${dk?32:42}% ${dk?42:72}%)`;
+    ctx.beginPath();ctx.roundRect(q.x-q.w/2,GY+sink+drop,q.w,520,24);ctx.fill();
+    ctx.fillStyle=`hsl(${hue(q.i)} ${dk?34:46}% ${dk?58:84}%)`;
+    ctx.beginPath();ctx.roundRect(q.x-11,GY+sink+drop+8,22,6,3);ctx.fill();
+  });
+  for(const r of rings){ctx.strokeStyle=`hsl(${hue(plats[ci].i)} 60% ${dk?72:50}%)`;ctx.globalAlpha=1-r.t/.7;ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(r.x,GY,20+r.t*140,6+r.t*20,0,0,6.283);ctx.stroke()}
+  ctx.globalAlpha=1;
+  // 玩家
+  let sx=1,sy=1,sink=st==='charge'&&ci>=0?p*12:0;
+  if(st==='charge'){sx=1+.28*p;sy=1-.38*p}
+  else if(st==='jump'){sx=.9;sy=1.15}
+  else if(landT<.4){const e=Math.exp(-landT*9)*Math.cos(landT*30)*.3;sx=1+e;sy=1-e}
+  const fl=st==='fall'||st==='over',cx=fl?B.x:P.x,base=fl?B.y+R:GY-P.y+sink;
+  ctx.save();ctx.translate(cx,base);ctx.scale(sx,sy);
+  ctx.fillStyle=cs.getPropertyValue('--pri').trim();ctx.beginPath();ctx.arc(0,-R,R,0,6.283);ctx.fill();
+  ctx.strokeStyle=cs.getPropertyValue('--on-pri').trim();ctx.globalAlpha=.7;ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,-R,R*.46,0,6.283);ctx.stroke();
+  ctx.restore();ctx.globalAlpha=1;
+  for(const q of parts){ctx.globalAlpha=Math.max(0,q.l);ctx.fillStyle=`hsl(${q.h} 60% 66%)`;ctx.beginPath();ctx.arc(q.x,q.y,5*q.l+1,0,6.283);ctx.fill()}
+  ctx.globalAlpha=1;
+  ctx.font='800 26px "Google Sans","PingFang SC",system-ui,sans-serif';ctx.textAlign='center';
+  for(const q of texts){ctx.globalAlpha=1-q.t;ctx.fillStyle=cs.getPropertyValue(q.p?'--pri':'--on-v').trim();ctx.fillText((q.p?'完美 ':'')+q.s,q.x,q.y)}
+  ctx.globalAlpha=1;ctx.restore();
+}
+function frame(ts){
+  const dt=Math.min(.04,(ts-(last||ts))/1000);last=ts;
+  update(dt,ts);draw(ts);requestAnimationFrame(frame);
+}
+function fit(){const d=window.devicePixelRatio||1;cv.width=Math.round(cv.clientWidth*d);cv.height=Math.round(cv.clientHeight*d)}
+
+/* 输入 */
+cv.addEventListener('pointerdown',e=>{e.preventDefault();press()});
+addEventListener('pointerup',release);addEventListener('pointercancel',release);
+addEventListener('keydown',e=>{if(e.code==='Space'&&!e.repeat){e.preventDefault();press()}});
+addEventListener('keyup',e=>{if(e.code==='Space')release()});
+const again=()=>{chargeOff();$('scrim').classList.remove('show');sfx.click();vib(20);reset()};
+$('restart').onclick=again;$('again').onclick=again;$('dbtn').onclick=again;
+function setT(id,on,a,b){const e=$(id);e.classList.toggle('on',on);e.textContent=on?a:b}
+$('snd').onclick=()=>{snd=!snd;setT('snd',snd,'🔊','🔇');try{localStorage.setItem('j-snd',snd?1:0)}catch(e){}sfx.click()};
+$('vib').onclick=()=>{vibOn=!vibOn;setT('vib',vibOn,'📳','📴');try{localStorage.setItem('j-vib',vibOn?1:0)}catch(e){}vib(50)};
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&st==='charge'){chargeOff();st='ready'}});
+addEventListener('resize',fit);
+setT('snd',snd,'🔊','🔇');setT('vib',vibOn,'📳','📴');
+fit();reset();requestAnimationFrame(frame);
+</script>
+</body>
+</html>
