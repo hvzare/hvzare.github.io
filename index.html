@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>游戏厅 · Expressive</title>
+<style>
+:root{
+  --bg:#fef7ff;--surf:#f3edf7;--on:#1d1b20;--on-v:#49454f;--pri:#6750a4;--on-pri:#fff;--pri-c:#eaddff;--on-pri-c:#21005d;
+  --cs:62%;--cl:90%;--cs2:45%;--cl2:26%;--spring:cubic-bezier(.34,1.56,.64,1);
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141218;--surf:#211f26;--on:#e6e0e9;--on-v:#cac4d0;--pri:#d0bcff;--on-pri:#381e72;--pri-c:#4f378b;--on-pri-c:#eaddff;--dk:1}}
+:root[data-theme="dark"]{--bg:#141218;--surf:#211f26;--on:#e6e0e9;--on-v:#cac4d0;--pri:#d0bcff;--on-pri:#381e72;--pri-c:#4f378b;--on-pri-c:#eaddff;--dk:1}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+html,body{margin:0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:var(--on);font-family:"Google Sans Flex","Google Sans","Segoe UI","PingFang SC","Noto Sans SC",system-ui,sans-serif;min-height:100%;display:flex;justify-content:center}
+.app{width:100%;max-width:560px;padding:20px 16px 36px}
+header{display:flex;align-items:center;justify-content:space-between;margin:8px 4px 20px}
+h1{margin:0;font-size:34px;font-weight:800;letter-spacing:-.8px}
+.sub{margin:4px 0 0;color:var(--on-v);font-size:14px}
+.tg{display:flex;gap:8px}
+.ic{width:48px;height:48px;border:0;border-radius:50%;background:var(--surf);color:var(--on-v);font-size:20px;cursor:pointer;transition:border-radius .45s var(--spring),background .3s,transform .3s var(--spring)}
+.ic.on{background:var(--pri-c);border-radius:18px;color:var(--on-pri-c)}
+.ic:active{transform:scale(.88)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{--h:260;display:flex;flex-direction:column;justify-content:space-between;gap:26px;min-height:190px;padding:18px;text-decoration:none;color:inherit;
+  background:hsl(var(--h) 60% 91%);color:hsl(var(--h) 40% 16%);border-radius:36px 36px 36px 36px;position:relative;overflow:hidden;
+  animation:in .6s var(--spring) both;animation-delay:calc(var(--i)*70ms);transition:border-radius .5s var(--spring),transform .35s var(--spring)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .card{background:hsl(var(--h) 24% 24%);color:hsl(var(--h) 60% 90%)}}
+:root[data-theme="dark"] .card{background:hsl(var(--h) 24% 24%);color:hsl(var(--h) 60% 90%)}
+.card:nth-child(odd){border-radius:36px 36px 12px 36px}
+.card:nth-child(even){border-radius:36px 12px 36px 36px}
+.card:hover{border-radius:50px;transform:translateY(-3px)}
+.card:active{transform:scale(.95);border-radius:28px}
+.card.wide{grid-column:1/-1;min-height:150px;flex-direction:row;align-items:flex-end}
+.badge{width:64px;height:64px;display:grid;place-items:center;font-size:32px;border-radius:50%;background:hsl(var(--h) 55% 80%);transition:border-radius .5s var(--spring),transform .5s var(--spring)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .badge{background:hsl(var(--h) 30% 36%)}}
+:root[data-theme="dark"] .badge{background:hsl(var(--h) 30% 36%)}
+.card:nth-child(even) .badge{border-radius:22px}
+.card:hover .badge{border-radius:30%;transform:rotate(-8deg) scale(1.08)}
+.card:nth-child(even):hover .badge{border-radius:50%}
+.name{font-size:22px;font-weight:800;margin:0 0 4px}
+.desc{margin:0;font-size:13px;line-height:1.45;opacity:.78}
+.go{position:absolute;right:16px;top:16px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:hsl(var(--h) 55% 80%);font-size:16px;opacity:0;transform:scale(.5);transition:all .4s var(--spring)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .go{background:hsl(var(--h) 30% 36%)}}
+:root[data-theme="dark"] .go{background:hsl(var(--h) 30% 36%)}
+.card:hover .go,.card:focus-visible .go{opacity:1;transform:none}
+.card:focus-visible{outline:3px solid var(--pri);outline-offset:3px}
+@keyframes in{from{transform:translateY(30px) scale(.8);opacity:0}}
+footer{margin:22px 6px 0;text-align:center;color:var(--on-v);font-size:13px}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div><h1>游戏厅</h1><p class="sub">5 款小游戏 · 点击卡片开始</p></div>
+    <div class="tg"><button class="ic on" id="snd" aria-label="音效">🔊</button><button class="ic on" id="vib" aria-label="振动">📳</button></div>
+  </header>
+  <main class="grid">
+    <a class="card" style="--h:265;--i:0" href="https://hvzare.github.io/%E6%89%AB%E9%9B%B7%C2%B7Expressive.html"><span class="go">↗</span><div class="badge">💣</div><div><h2 class="name">扫雷</h2><p class="desc">三档难度，长按插旗，点数字快速展开</p></div></a>
+    <a class="card" style="--h:150;--i:1" href="https://hvzare.github.io/%E8%B4%AA%E5%90%83%E8%9B%87%20%C2%B7%20Expressive.html"><span class="go">↗</span><div class="badge">🐍</div><div><h2 class="name">贪吃蛇</h2><p class="desc">平滑滑行的圆角小蛇，越吃越快</p></div></a>
+    <a class="card" style="--h:35;--i:2" href="https://hvzare.github.io/2048%20%C2%B7%20Expressive.html"><span class="go">↗</span><div class="badge">🔢</div><div><h2 class="name">2048</h2><p class="desc">4×4、5×5、6×6，可撤销一步</p></div></a>
+    <a class="card" style="--h:330;--i:3" href="https://hvzare.github.io/%E8%B7%B3%E4%B8%80%E8%B7%B3%20%C2%B7%20Expressive.html"><span class="go">↗</span><div class="badge">🦘</div><div><h2 class="name">跳一跳</h2><p class="desc">按住蓄力，落在中心连击得分</p></div></a>
+    <a class="card wide" style="--h:200;--i:4" href="https://hvzare.github.io/%E7%A9%BA%E6%88%98%20%C2%B7%20Expressive.html"><span class="go">↗</span><div class="badge">✈️</div><div><h2 class="name">空战</h2><p class="desc">拖动飞机自动开火，护盾敌机，定期出现 BOSS</p></div></a>
+  </main>
+  <footer>所有游戏均支持音效与振动开关</footer>
+</div>
+<script>
+let snd=true,vibOn=true,ac;
+try{snd=localStorage.getItem('h-snd')!=='0';vibOn=localStorage.getItem('h-vib')!=='0'}catch(e){}
+function tone(f,d=.07,v=.08){if(!snd)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),G=ac.createGain(),t=ac.currentTime;
+  o.frequency.setValueAtTime(f,t);G.gain.setValueAtTime(.0001,t);G.gain.linearRampToValueAtTime(v,t+.004);G.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(G).connect(ac.destination);o.start(t);o.stop(t+d+.02)}catch(e){}}
+const vib=p=>{if(vibOn&&navigator.vibrate){try{navigator.vibrate(p)}catch(e){}}};
+const $=id=>document.getElementById(id);
+function setT(id,on,a,b){const e=$(id);e.classList.toggle('on',on);e.textContent=on?a:b}
+$('snd').onclick=()=>{snd=!snd;setT('snd',snd,'🔊','🔇');try{localStorage.setItem('h-snd',snd?1:0)}catch(e){}tone(1800,.03)};
+$('vib').onclick=()=>{vibOn=!vibOn;setT('vib',vibOn,'📳','📴');try{localStorage.setItem('h-vib',vibOn?1:0)}catch(e){}vib(50)};
+document.querySelectorAll('.card').forEach((c,i)=>{
+  c.addEventListener('pointerdown',()=>{tone(520*Math.pow(2,[0,2,4,7,9][i]/12),.2,.1);vib(18)});
+  c.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse')tone(1600,.025,.03)});
+});
+setT('snd',snd,'🔊','🔇');setT('vib',vibOn,'📳','📴');
+</script>
+</body>
+</html>
